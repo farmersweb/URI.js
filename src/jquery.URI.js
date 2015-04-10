@@ -106,7 +106,28 @@
       return $(elem).uri();
     },
     set: function(elem, value) {
-      return $(elem).uri().href(value).toString();
+      //while 'src'/'href'/'action'/'uri' and 'cite are traditionally used
+      //for html elements with URIs, there are instances where we actually
+      //do want to allow attr( 'action', value ) to be directly set.
+      //
+      //one such instance is with angular, which will use jQuery if it
+      //is present on the page for attr() setting in the "shadow dom". 
+      //if a directive uses any of the preceeding keys as a scope attribute, this will
+      //conflict with it.
+      //
+      //in the case that happens ( $.fn.uri will throw an error ), fall back
+      //
+      //not sure what to do on second pass since if the element does not
+      //have that attribute on first pass, they will on the second, 
+      //and URI will attempt to make a url out of it
+      
+      try {
+        return $(elem).uri().href(value).toString();
+      }
+      catch( error ) {
+        //default to fallback by returning undefined
+        return;
+      }
     }
   };
   $.each(['src', 'href', 'action', 'uri', 'cite'], function(k, v) {
